@@ -1,5 +1,6 @@
 package ru.practicum.shareit.item.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.exception.NotFoundException;
@@ -13,6 +14,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final UserService userService;
@@ -29,19 +31,13 @@ public class ItemServiceImpl implements ItemService {
             throw new NotFoundException(String.format("User not found: id=%d", userId));
         }
         Item item = ItemMapper.toItem(itemDto, userId);
+        log.info("Convert itemDto to item {}", item);
         return ItemMapper.toItemDto(itemRepository.add(item));
     }
 
     @Override
     public ItemDto update(Long userId, ItemDto itemDto, Long itemId) {
-        if (userService.isUserIdExists(userId)) {
-            throw new NotFoundException(String.format("User not found: id=%d", userId));
-        }
-        Item item = itemRepository.getById(itemId).orElseThrow(() ->
-                new NotFoundException(String.format("Item not found: id=%d", itemId)));
-        if (!item.getOwner().equals(userId)) {
-            throw new NotFoundException(String.format("User id=%d is not the owner item id=%d", userId, itemId));
-        }
+        Item item = checkUserAndItemExistAndUserIsOwnerOfItem(userId, itemId);
         if (itemDto.getName() != null) {
             item.setName(itemDto.getName());
         }
@@ -51,19 +47,13 @@ public class ItemServiceImpl implements ItemService {
         if (itemDto.getAvailable() != null) {
             item.setAvailable(itemDto.getAvailable());
         }
+        log.info("Convert itemDto to item {}", item);
         return ItemMapper.toItemDto(itemRepository.update(item));
     }
 
     @Override
     public void deleteItem(Long userId, Long itemId) {
-        if (userService.isUserIdExists(userId)) {
-            throw new NotFoundException(String.format("User not found: id=%d", userId));
-        }
-        Item item = itemRepository.getById(itemId).orElseThrow(() ->
-                new NotFoundException(String.format("Item not found: id=%d", itemId)));
-        if (!item.getOwner().equals(userId)) {
-            throw new NotFoundException(String.format("User id=%d is not the owner item id=%d", userId, itemId));
-        }
+        checkUserAndItemExistAndUserIsOwnerOfItem(userId, itemId);
         itemRepository.deleteItem(itemId);
     }
 
@@ -71,6 +61,7 @@ public class ItemServiceImpl implements ItemService {
     public ItemDto getById(Long id) {
         Item item = itemRepository.getById(id).orElseThrow(() ->
                 new NotFoundException(String.format("Item not found: id=%d", id)));
+        log.info("Create item {}", item);
         return ItemMapper.toItemDto(item);
     }
 
@@ -89,5 +80,19 @@ public class ItemServiceImpl implements ItemService {
                 .stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
+    }
+
+    private Item checkUserAndItemExistAndUserIsOwnerOfItem(Long userId, Long itemId) {
+        if (userService.isUserIdExists(userId)) {
+            throw new NotFoundException(String.format("User not found: id=%d", userId));
+        }
+        Item item = itemRepository.getById(itemId).orElseThrow(() ->
+                new NotFoundException(String.format("Item not found: id=%d", itemId)));
+        if (!item.getOwner().equals(userId)) {
+            throw new NotFoundException(String.format("User id=%d is not the owner item id=%d", userId, itemId));
+        }
+        log.info("Checks on the existence of the user id={} and the item id={}, " +
+                "whether the user is the owner of the item, passed successfully", userId, itemId);
+        return item;
     }
 }
