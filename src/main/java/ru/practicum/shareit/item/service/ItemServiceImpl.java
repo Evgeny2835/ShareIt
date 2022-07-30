@@ -37,7 +37,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto update(Long userId, ItemDto itemDto, Long itemId) {
-        Item item = checkUserAndItemExistAndUserIsOwnerOfItem(userId, itemId);
+        Item item = validateUserAndItemAndReturnItem(userId, itemId);
         if (itemDto.getName() != null) {
             item.setName(itemDto.getName());
         }
@@ -53,7 +53,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public void deleteItem(Long userId, Long itemId) {
-        checkUserAndItemExistAndUserIsOwnerOfItem(userId, itemId);
+        validateUserAndItemAndReturnItem(userId, itemId);
         itemRepository.deleteItem(itemId);
     }
 
@@ -82,7 +82,7 @@ public class ItemServiceImpl implements ItemService {
                 .collect(Collectors.toList());
     }
 
-    private Item checkUserAndItemExistAndUserIsOwnerOfItem(Long userId, Long itemId) {
+    private Item validateUserAndItemAndReturnItem(Long userId, Long itemId) {
         if (userService.isUserIdExists(userId)) {
             throw new NotFoundException(String.format("User not found: id=%d", userId));
         }
