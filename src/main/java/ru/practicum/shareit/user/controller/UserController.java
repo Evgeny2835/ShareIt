@@ -23,8 +23,8 @@ public class UserController {
     }
 
     @PostMapping
-    public UserDto add(@Valid @RequestBody UserDto userDto) {
-        return userService.add(userDto);
+    public UserDto create(@Valid @RequestBody UserDto userDto) {
+        return userService.create(userDto);
     }
 
     @PatchMapping("/{id}")
