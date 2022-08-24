@@ -1,8 +1,8 @@
 package ru.practicum.shareit.user.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.practicum.shareit.exception.EmailDuplicationException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
@@ -12,6 +12,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import java.util.Collection;
 
 @Service
+@Slf4j
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
 
@@ -20,20 +21,14 @@ public class UserServiceImpl implements UserService {
         this.userRepository = userRepository;
     }
 
-    public UserDto add(UserDto userDto) {
+    public UserDto create(UserDto userDto) {
         User user = UserMapper.toUser(userDto);
-        if (userRepository.isUserEmailExists(user.getEmail())) {
-            throw new EmailDuplicationException(String.format("User with email exists: %s", user.getEmail()));
-        }
-        return UserMapper.toUserDto(userRepository.add(user));
+        log.info("New user added: id={}", user.getId());
+        return UserMapper.toUserDto(userRepository.save(user));
     }
 
     public UserDto update(UserDto userDto, Long userId) {
-        if (userDto.getEmail() != null &&
-                userRepository.isUserEmailExists(userDto.getEmail())) {
-            throw new EmailDuplicationException(String.format("User with email exists: %s", userDto.getEmail()));
-        }
-        User user = userRepository.getById(userId).orElseThrow(() ->
+        User user = userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException(String.format("User not found: id=%d", userId)));
         if (userDto.getEmail() != null) {
             user.setEmail(userDto.getEmail());
@@ -41,26 +36,28 @@ public class UserServiceImpl implements UserService {
         if (userDto.getName() != null) {
             user.setName(userDto.getName());
         }
-        return UserMapper.toUserDto(userRepository.update(user));
+        log.info("User updated: id={}", user.getId());
+        return UserMapper.toUserDto(userRepository.save(user));
     }
 
     public void deleteUser(Long userId) {
-        if (userRepository.isUserIdExists(userId)) {
+        if (!userRepository.existsById(userId)) {
             throw new NotFoundException(String.format("User not found: id=%d", userId));
         }
-        userRepository.deleteUser(userId);
+        log.info("User deleted: id={}", userId);
+        userRepository.deleteById(userId);
     }
 
     public User getById(Long userId) {
-        return userRepository.getById(userId).orElseThrow(() ->
+        return userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException(String.format("User not found: id=%d", userId)));
     }
 
     public Collection<User> getUsers() {
-        return userRepository.getUsers();
+        return userRepository.findAll();
     }
 
-    public boolean isUserIdExists(Long userId) {
-        return userRepository.isUserIdExists(userId);
+    public boolean isUserExists(Long userId) {
+        return userRepository.existsById(userId);
     }
 }

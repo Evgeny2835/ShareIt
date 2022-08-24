@@ -6,7 +6,7 @@ import ru.practicum.shareit.user.model.User;
 import java.util.Collection;
 
 public interface UserService {
-    UserDto add(UserDto userDto);
+    UserDto create(UserDto userDto);
 
     UserDto update(UserDto userDto, Long userId);
 
@@ -16,5 +16,5 @@ public interface UserService {
 
     Collection<User> getUsers();
 
-    boolean isUserIdExists(Long userId);
+    boolean isUserExists(Long userId);
 }
