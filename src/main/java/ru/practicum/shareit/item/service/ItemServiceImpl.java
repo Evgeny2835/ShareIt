@@ -2,8 +2,13 @@ package ru.practicum.shareit.item.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingState;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
@@ -32,30 +37,36 @@ public class ItemServiceImpl implements ItemService {
     private final CommentRepository commentRepository;
     private final BookingService bookingService;
 
+    private final BookingRepository bookingRepository;
+
     @Autowired
     public ItemServiceImpl(ItemRepository itemRepository,
                            UserService userService,
                            ItemMapper itemMapper,
                            CommentRepository commentRepository,
-                           BookingService bookingService) {
+                           BookingService bookingService,
+                           BookingRepository bookingRepository) {
         this.itemRepository = itemRepository;
         this.userService = userService;
         this.itemMapper = itemMapper;
         this.commentRepository = commentRepository;
         this.bookingService = bookingService;
+        this.bookingRepository = bookingRepository;
     }
 
     @Override
     public ItemDto create(Long userId, ItemDto itemDto) {
         User user = userService.getById(userId);
         Item item = itemMapper.toItem(itemDto, user);
-        log.info("New item added: id={}", item.getId());
+        log.info("User id={} added new item '{}'", userId, item.getName());
         return itemMapper.toItemDto(itemRepository.save(item));
     }
 
     @Override
     public ItemDto update(Long userId, ItemDto itemDto, Long itemId) {
-        Item item = validateUserAndItemAndReturnItem(userId, itemId);
+        validateUserId(userId);
+        Item item = getById(itemId);
+        checkUserIsItemOwner(userId, item);
         if (itemDto.getName() != null) {
             item.setName(itemDto.getName());
         }
@@ -71,7 +82,8 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public void deleteItem(Long userId, Long itemId) {
-        validateUserAndItemAndReturnItem(userId, itemId);
+        validateUserId(userId);
+        checkUserIsItemOwner(userId, getById(itemId));
         log.info("Item deleted: id={}", itemId);
         itemRepository.deleteById(itemId);
     }
@@ -82,33 +94,64 @@ public class ItemServiceImpl implements ItemService {
                 new NotFoundException(String.format("Item not found: id=%d", itemId)));
     }
 
-    public List<Item> getUserItems(Long userId) {
-        if (!userService.isUserExists(userId)) {
-            throw new NotFoundException(String.format("User not found: id=%d", userId));
+    @Override
+    public List<ItemDto> getUserItems(Long userId, Integer from, Integer size) {
+        validateUserId(userId);
+        List<Item> items;
+        if (from == null || size == null) {
+            items = itemRepository
+                    .findAllByOwnerId(userId)
+                    .stream()
+                    .sorted(Comparator.comparing(Item::getId))
+                    .collect(Collectors.toList());
+        } else {
+            Pageable pageable = PageRequest.of(from, size, Sort.by("id"));
+            items = itemRepository.findAllByOwnerId(userId, pageable);
         }
-        return itemRepository.findAll()
+        log.info("List of items has been compiled");
+        return items
                 .stream()
-                .filter(s -> s.getOwner().equals(userService.getById(userId)))
-                .sorted(Comparator.comparing(Item::getId))
-                .collect(Collectors.toList());
-    }
-
-    public List<ItemDto> keywordSearch(String keyword) {
-        return itemRepository.search(keyword)
-                .stream()
-                .filter((Item::getAvailable))
                 .map(itemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
 
     @Override
+    public List<ItemDto> keywordSearch(String keyword, Integer from, Integer size) {
+
+        // старый рабочий вариант без пангинации
+        return itemRepository.search(keyword)
+                .stream()
+                .filter((Item::getAvailable))
+                .map(itemMapper::toItemDto)
+                .collect(Collectors.toList());
+
+        // новый вариант с пангинацией - не запускается
+
+    /*    List<Item> items;
+        if (from == null || size == null) {
+            items = itemRepository.search(keyword);
+        } else {
+            Pageable pageable = PageRequest.of(from, size, Sort.by("id"));
+            items = itemRepository.search(keyword, pageable).getContent();
+        }
+        return items
+                .stream()
+                .filter((Item::getAvailable))
+                .map(itemMapper::toItemDto)
+                .collect(Collectors.toList());*/
+    }
+
+    @Override
     public Comment createComment(Long userId, Long itemId, CommentDto commentDto) {
         User user = userService.getById(userId);
-        Item item = itemRepository.findById(itemId).orElseThrow(() ->
-                new NotFoundException(String.format("Item not found: id=%d", itemId)));
+        Item item = getById(itemId);
         Comment comment = new Comment(commentDto.getText(), item, user, LocalDateTime.now());
         try {
-            bookingService.getAllByBooker(comment.getAuthor().getId(), BookingState.PAST).stream()
+            bookingRepository.getBookingsByBookerId(comment.getAuthor().getId())
+                    .stream()
+                    .filter(s -> s.getStart().isBefore(LocalDateTime.now()))
+                    .filter(s -> s.getEnd().isBefore(LocalDateTime.now()))
+                    .sorted(Comparator.comparing(Booking::getStart).reversed())
                     .filter(booking -> Objects.equals(booking.getItem().getId(), comment.getItem().getId()))
                     .findFirst()
                     .orElseThrow(() -> new NotFoundException("Not found booking for this user"));
@@ -118,17 +161,17 @@ public class ItemServiceImpl implements ItemService {
         return commentRepository.save(comment);
     }
 
-    private Item validateUserAndItemAndReturnItem(Long userId, Long itemId) {
-        if (!userService.isUserExists(userId)) {
-            throw new NotFoundException(String.format("User not found: id=%d", userId));
-        }
-        Item item = itemRepository.findById(itemId).orElseThrow(() ->
-                new NotFoundException(String.format("Item not found: id=%d", itemId)));
-        if (!item.getOwner().equals(userService.getById(userId))) {
-            throw new NotFoundException(String.format("User id=%d is not the owner item id=%d", userId, itemId));
+    private void checkUserIsItemOwner(Long userId, Item item) {
+        if (!item.getOwner().getId().equals(userId)) {
+            throw new NotFoundException(String.format("User id=%d is not the owner item id=%d",
+                    userId, item.getId()));
         }
         log.info("Checks on the existence of the user id={} and the item id={}, " +
-                "whether the user is the owner of the item, passed successfully", userId, itemId);
-        return item;
+                        "whether the user is the owner of the item, passed successfully",
+                userId, item.getId());
+    }
+
+    private void validateUserId(Long userId) {
+        userService.getById(userId);
     }
 }

@@ -8,9 +8,11 @@ import ru.practicum.shareit.item.comment.service.CommentMapper;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.requests.dto.ItemRequestDto;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -56,19 +58,20 @@ public class ItemController {
     }
 
     @GetMapping
-    public List<ItemDto> getUserItems(@RequestHeader("X-Sharer-User-Id") @Positive Long userId) {
-        return itemService.getUserItems(userId)
-                .stream()
-                .map(itemMapper::toItemDto)
-                .collect(Collectors.toList());
+    public List<ItemDto> getUserItems(@RequestHeader("X-Sharer-User-Id") @Positive Long userId,
+                                      @RequestParam(name = "from", required = false) @PositiveOrZero Integer from,
+                                      @RequestParam(name = "size", required = false) @Positive Integer size) {
+        return itemService.getUserItems(userId, from, size);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> keywordSearch(@RequestParam(name = "text", defaultValue = "") String keyword) {
+    public List<ItemDto> keywordSearch(@RequestParam(name = "text", defaultValue = "") String keyword,
+                                       @RequestParam(name = "from", required = false) @PositiveOrZero Integer from,
+                                       @RequestParam(name = "size", required = false) @Positive Integer size) {
         if (keyword.isEmpty()) {
             return Collections.emptyList();
         }
-        return itemService.keywordSearch(keyword);
+        return itemService.keywordSearch(keyword, from, size);
     }
 
     @PostMapping("{itemId}/comment")

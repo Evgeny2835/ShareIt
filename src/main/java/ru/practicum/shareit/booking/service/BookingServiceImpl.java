@@ -1,8 +1,12 @@
 package ru.practicum.shareit.booking.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.dto.BookingCreateDto;
+import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingState;
@@ -85,38 +89,46 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> getAllByBooker(Long userId, BookingState state) {
-        if (!userService.isUserExists(userId)) {
-            throw new NotFoundException(String.format("User not found: id=%d", userId));
+    public List<BookingDto> getAllByBooker(Long userId, BookingState state, Integer from, Integer size) {
+        validateUserId(userId);
+        List<Booking> bookings;
+        if (from == null || size == null) {
+            bookings = bookingRepository.findAllByBooker_IdOrderByStartDesc(userId);
+        } else if (from != 0 && size != 0 && from.equals(size))  {
+            Pageable pageable = PageRequest.of(from / size, size, Sort.by("start").descending());
+            bookings = bookingRepository.getBookingsByBookerId(userId, pageable);
+        } else {
+            Pageable pageable = PageRequest.of(from, size, Sort.by("start").descending());
+            bookings = bookingRepository.getBookingsByBookerId(userId, pageable);
         }
-        List<Booking> bookings = bookingRepository.getBookingsByBookerId(userId)
+        return getBookingsByState(state, bookings)
                 .stream()
-                .sorted(Comparator.comparing(Booking::getStart).reversed())
+                .map(bookingMapper::toBookingDtoOutput)
                 .collect(Collectors.toList());
-        return getBookingsByState(state, bookings);
     }
 
     @Override
-    public List<Booking> getAllByItemsOwner(Long userId, BookingState state) {
-        if (!userService.isUserExists(userId)) {
-            throw new NotFoundException(String.format("User not found: id=%d", userId));
-        }
-        List<Item> items = itemRepository.findAll()
-                .stream()
-                .filter(s -> s.getOwner().equals(userService.getById(userId)))
-                .collect(Collectors.toList());
+    public List<Booking> getAllByItemsOwner(Long userId, BookingState state, Integer from, Integer size) {
+        validateUserId(userId);
+        List<Item> items = itemRepository.findAllByOwnerId(userId);
         if (items.isEmpty()) {
             throw new NotFoundException(String.format("User id=%d has no items", userId));
         }
-        Set<Long> itemsIdByOwner = items
-                .stream()
-                .map(Item::getId)
-                .collect(Collectors.toSet());
-        List<Booking> bookings = bookingRepository.findAll()
-                .stream()
-                .filter(s -> itemsIdByOwner.contains(s.getItem().getId()))
-                .sorted(Comparator.comparing(Booking::getStart).reversed())
-                .collect(Collectors.toList());
+        List<Booking> bookings;
+        if (from == null || size == null) {
+            Set<Long> itemsIdByOwner = items
+                    .stream()
+                    .map(Item::getId)
+                    .collect(Collectors.toSet());
+            bookings = bookingRepository.findAll()
+                    .stream()
+                    .filter(s -> itemsIdByOwner.contains(s.getItem().getId()))
+                    .sorted(Comparator.comparing(Booking::getStart).reversed())
+                    .collect(Collectors.toList());
+        } else {
+            Pageable pageable = PageRequest.of(from, size, Sort.by("start").descending());
+            bookings = bookingRepository.findAllByItemIn(items, pageable).getContent();
+        }
         return getBookingsByState(state, bookings);
     }
 
@@ -161,5 +173,9 @@ public class BookingServiceImpl implements BookingService {
             default:
                 throw new ValidationException("Unknown state: " + state);
         }
+    }
+
+    private void validateUserId(Long userId) {
+        userService.getById(userId);
     }
 }

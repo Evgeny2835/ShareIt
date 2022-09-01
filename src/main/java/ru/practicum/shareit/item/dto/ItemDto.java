@@ -22,7 +22,7 @@ public class ItemDto {
     @NotNull
     private Boolean available;
     private Long ownerId;
-    private ItemRequest request;
+    private Long requestId;
     private BookingItemDto lastBooking;
     private BookingItemDto nextBooking;
     Set<CommentDto> comments;
@@ -32,13 +32,13 @@ public class ItemDto {
                    String description,
                    Boolean available,
                    Long ownerId,
-                   ItemRequest request) {
+                   Long requestId) {
         this.id = id;
         this.name = name;
         this.description = description;
         this.available = available;
         this.ownerId = ownerId;
-        this.request = request;
+        this.requestId = requestId;
         this.comments = new HashSet<>();
     }
 }

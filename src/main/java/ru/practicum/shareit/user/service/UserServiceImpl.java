@@ -23,7 +23,7 @@ public class UserServiceImpl implements UserService {
 
     public UserDto create(UserDto userDto) {
         User user = UserMapper.toUser(userDto);
-        log.info("New user added: id={}", user.getId());
+        log.info("New user added: email={}", user.getEmail());
         return UserMapper.toUserDto(userRepository.save(user));
     }
 
