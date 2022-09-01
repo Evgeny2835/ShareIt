@@ -40,8 +40,8 @@ public class ItemMapper {
                 itemDto.getDescription(),
                 itemDto.getAvailable(),
                 owner,
-                itemDto.getRequestId() != null ? itemRequestRepository.
-                        findById(itemDto.getRequestId()).orElse(null) : null
+                itemDto.getRequestId() != null ? itemRequestRepository
+                        .findById(itemDto.getRequestId()).orElse(null) : null
         );
     }
 

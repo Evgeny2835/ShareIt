@@ -7,9 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.comment.dto.CommentDto;
@@ -35,8 +33,6 @@ public class ItemServiceImpl implements ItemService {
     private final UserService userService;
     private final ItemMapper itemMapper;
     private final CommentRepository commentRepository;
-    private final BookingService bookingService;
-
     private final BookingRepository bookingRepository;
 
     @Autowired
@@ -44,13 +40,11 @@ public class ItemServiceImpl implements ItemService {
                            UserService userService,
                            ItemMapper itemMapper,
                            CommentRepository commentRepository,
-                           BookingService bookingService,
                            BookingRepository bookingRepository) {
         this.itemRepository = itemRepository;
         this.userService = userService;
         this.itemMapper = itemMapper;
         this.commentRepository = commentRepository;
-        this.bookingService = bookingService;
         this.bookingRepository = bookingRepository;
     }
 
