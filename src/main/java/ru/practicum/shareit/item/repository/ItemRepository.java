@@ -14,7 +14,10 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
             " or upper(i.description) like upper(concat('%', ?1, '%'))")
     List<Item> search(String text);
 
-    //Page<Item> search(String text, Pageable pageable);
+    List<Item> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(
+            String keywordInName,
+            String keywordInDescription,
+            Pageable pageable);
 
     List<Item> findAllByOwnerId(Long ownerId);
 

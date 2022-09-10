@@ -89,14 +89,14 @@ public class ItemMapper {
     }
 
     private ItemDto createItemDto(Item item) {
-        ItemDto itemDto = new ItemDto(
-                item.getId(),
-                item.getName(),
-                item.getDescription(),
-                item.getAvailable(),
-                item.getOwner().getId(),
-                item.getRequest() != null ? item.getRequest().getId() : null
-        );
+        ItemDto itemDto = ItemDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
+                .ownerId(item.getOwner().getId())
+                .requestId(item.getRequest() != null ? item.getRequest().getId() : null)
+                .build();
         itemDto.setComments(commentRepository.findCommentsByItem_Id(item.getId())
                 .stream()
                 .map(commentMapper::toCommentDto)

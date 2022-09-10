@@ -1,15 +1,17 @@
-package ru.practicum.shareit.user.service;
+package ru.practicum.shareit.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.exception.EmailDuplicateException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
-import java.util.Collection;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -22,28 +24,34 @@ public class UserServiceImpl implements UserService {
     }
 
     public UserDto create(UserDto userDto) {
-        User user = UserMapper.toUser(userDto);
-        log.info("New user added: email={}", user.getEmail());
-        return UserMapper.toUserDto(userRepository.save(user));
+        try {
+            User user = UserMapper.toUser(userDto);
+            log.info("New user added: email={}", user.getEmail());
+            return UserMapper.toUserDto(userRepository.save(user));
+        } catch (DataIntegrityViolationException e) {
+            throw new EmailDuplicateException("Email exists");
+        }
     }
 
     public UserDto update(UserDto userDto, Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new NotFoundException(String.format("User not found: id=%d", userId)));
-        if (userDto.getEmail() != null) {
-            user.setEmail(userDto.getEmail());
+        try {
+            if (userDto.getEmail() != null) {
+                user.setEmail(userDto.getEmail());
+            }
+            if (userDto.getName() != null) {
+                user.setName(userDto.getName());
+            }
+            log.info("User updated: id={}", user.getId());
+            return UserMapper.toUserDto(userRepository.save(user));
+        } catch (DataIntegrityViolationException e) {
+            throw new EmailDuplicateException("Email exists");
         }
-        if (userDto.getName() != null) {
-            user.setName(userDto.getName());
-        }
-        log.info("User updated: id={}", user.getId());
-        return UserMapper.toUserDto(userRepository.save(user));
     }
 
     public void deleteUser(Long userId) {
-        if (!userRepository.existsById(userId)) {
-            throw new NotFoundException(String.format("User not found: id=%d", userId));
-        }
+        validateUserId(userId);
         log.info("User deleted: id={}", userId);
         userRepository.deleteById(userId);
     }
@@ -53,11 +61,11 @@ public class UserServiceImpl implements UserService {
                 new NotFoundException(String.format("User not found: id=%d", userId)));
     }
 
-    public Collection<User> getUsers() {
+    public List<User> getUsers() {
         return userRepository.findAll();
     }
 
-    public boolean isUserExists(Long userId) {
-        return userRepository.existsById(userId);
+    private void validateUserId(Long userId) {
+        getById(userId);
     }
 }

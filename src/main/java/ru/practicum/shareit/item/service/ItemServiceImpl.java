@@ -18,7 +18,7 @@ import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.UserService;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -99,7 +99,7 @@ public class ItemServiceImpl implements ItemService {
                     .sorted(Comparator.comparing(Item::getId))
                     .collect(Collectors.toList());
         } else {
-            Pageable pageable = PageRequest.of(from, size, Sort.by("id"));
+            Pageable pageable = PageRequest.of(from / size, size, Sort.by("id"));
             items = itemRepository.findAllByOwnerId(userId, pageable);
         }
         log.info("List of items has been compiled");
@@ -111,28 +111,22 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemDto> keywordSearch(String keyword, Integer from, Integer size) {
-
-        // старый рабочий вариант без пангинации
-        return itemRepository.search(keyword)
-                .stream()
-                .filter((Item::getAvailable))
-                .map(itemMapper::toItemDto)
-                .collect(Collectors.toList());
-
-        // новый вариант с пангинацией - не запускается
-
-    /*    List<Item> items;
+        List<Item> items;
         if (from == null || size == null) {
-            items = itemRepository.search(keyword);
+            items = itemRepository.search(keyword)
+                    .stream()
+                    .filter(Item::getAvailable)
+                    .sorted(Comparator.comparing(Item::getId))
+                    .collect(Collectors.toList());
         } else {
-            Pageable pageable = PageRequest.of(from, size, Sort.by("id"));
-            items = itemRepository.search(keyword, pageable).getContent();
+            Pageable pageable = PageRequest.of(from / size, size, Sort.by("id"));
+            items = itemRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(
+                    keyword, keyword, pageable);
         }
         return items
                 .stream()
-                .filter((Item::getAvailable))
                 .map(itemMapper::toItemDto)
-                .collect(Collectors.toList());*/
+                .collect(Collectors.toList());
     }
 
     @Override

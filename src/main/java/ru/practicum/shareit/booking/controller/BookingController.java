@@ -14,7 +14,6 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(path = "/bookings")
@@ -64,9 +63,7 @@ public class BookingController {
             @RequestParam(defaultValue = "ALL") BookingState state,
             @RequestParam(name = "from", required = false) @PositiveOrZero Integer from,
             @RequestParam(name = "size", required = false) @Positive Integer size) {
-        return bookingService.getAllByItemsOwner(userId, state, from, size)
-                .stream()
-                .map(bookingMapper::toBookingDtoOutput)
-                .collect(Collectors.toList());
+        return bookingService.getAllByItemsOwner(userId, state, from, size);
+
     }
 }

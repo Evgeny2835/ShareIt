@@ -12,7 +12,7 @@ import ru.practicum.shareit.requests.mapper.ItemRequestMapper;
 import ru.practicum.shareit.requests.model.ItemRequest;
 import ru.practicum.shareit.requests.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.UserService;
 
 import java.util.Comparator;
 import java.util.List;
@@ -60,7 +60,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         if (from == null || size == null) {
             requests = requestRepository.findAllByOwnerIdIsNot(ownerId);
         } else {
-            Pageable pageable = PageRequest.of(from, size, Sort.by("created").descending());
+            Pageable pageable = PageRequest.of(from / size, size, Sort.by("created").descending());
             requests = requestRepository.findAllByOwnerIdIsNot(ownerId, pageable).getContent();
         }
         log.info("List of requests from other users has been compiled");

@@ -1,10 +1,7 @@
 package ru.practicum.shareit.requests.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
@@ -17,6 +14,7 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
+@Builder
 @Table(name = "requests")
 @AllArgsConstructor
 @NoArgsConstructor
@@ -34,10 +32,7 @@ public class ItemRequest {
     @JoinColumn(name = "owner_id", nullable = false)
     private User owner;
 
-    @OneToMany(mappedBy = "request",
-            orphanRemoval = true,
-            cascade = CascadeType.REMOVE,
-            fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "request")
     @JsonIgnore
     private List<Item> items = new ArrayList<>();
 

@@ -17,7 +17,7 @@ import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.UserService;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -65,8 +65,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Booking getById(Long userId, Long bookingId) {
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
-                new NotFoundException(String.format("Booking not found: id=%d", bookingId)));
+        Booking booking = validateIsBookingIdExistAndReturnBooking(bookingId);
         if (booking.getBooker().getId().equals(userId)
                 || booking.getItem().getOwner().getId().equals(userId)) {
             return booking;
@@ -76,8 +75,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public Booking approve(Long userId, Long bookingId, Boolean approved) {
-        Booking booking = bookingRepository.findById(bookingId).orElseThrow(() ->
-                new NotFoundException(String.format("Booking not found: id=%d", bookingId)));
+        Booking booking = validateIsBookingIdExistAndReturnBooking(bookingId);
         if (booking.getStatus() != BookingStatus.WAITING) {
             throw new ValidationException(String.format("Booking not available: id=%d", bookingId));
         }
@@ -94,11 +92,8 @@ public class BookingServiceImpl implements BookingService {
         List<Booking> bookings;
         if (from == null || size == null) {
             bookings = bookingRepository.findAllByBooker_IdOrderByStartDesc(userId);
-        } else if (from != 0 && size != 0 && from.equals(size))  {
-            Pageable pageable = PageRequest.of(from / size, size, Sort.by("start").descending());
-            bookings = bookingRepository.getBookingsByBookerId(userId, pageable);
         } else {
-            Pageable pageable = PageRequest.of(from, size, Sort.by("start").descending());
+            Pageable pageable = PageRequest.of(from / size, size, Sort.by("start").descending());
             bookings = bookingRepository.getBookingsByBookerId(userId, pageable);
         }
         return getBookingsByState(state, bookings)
@@ -108,7 +103,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<Booking> getAllByItemsOwner(Long userId, BookingState state, Integer from, Integer size) {
+    public List<BookingDto> getAllByItemsOwner(Long userId, BookingState state, Integer from, Integer size) {
         validateUserId(userId);
         List<Item> items = itemRepository.findAllByOwnerId(userId);
         if (items.isEmpty()) {
@@ -126,10 +121,13 @@ public class BookingServiceImpl implements BookingService {
                     .sorted(Comparator.comparing(Booking::getStart).reversed())
                     .collect(Collectors.toList());
         } else {
-            Pageable pageable = PageRequest.of(from, size, Sort.by("start").descending());
+            Pageable pageable = PageRequest.of(from / size, size, Sort.by("start").descending());
             bookings = bookingRepository.findAllByItemIn(items, pageable).getContent();
         }
-        return getBookingsByState(state, bookings);
+        return getBookingsByState(state, bookings)
+                .stream()
+                .map(bookingMapper::toBookingDtoOutput)
+                .collect(Collectors.toList());
     }
 
     public List<Booking> getAllByItem(Item item) {
@@ -177,5 +175,10 @@ public class BookingServiceImpl implements BookingService {
 
     private void validateUserId(Long userId) {
         userService.getById(userId);
+    }
+
+    private Booking validateIsBookingIdExistAndReturnBooking(Long bookingId) {
+        return bookingRepository.findById(bookingId).orElseThrow(() ->
+                new NotFoundException(String.format("Booking not found: id=%d", bookingId)));
     }
 }
