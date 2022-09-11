@@ -30,35 +30,35 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ItemRequestServiceTest {
     @Mock
-    UserService userService;
+    private UserService userService;
     @Mock
-    ItemRequestMapper requestMapper;
+    private ItemRequestMapper requestMapper;
     @Mock
-    ItemRequestRepository requestRepository;
+    private ItemRequestRepository requestRepository;
     @InjectMocks
-    ItemRequestServiceImpl requestService;
+    private ItemRequestServiceImpl requestService;
     private static final Long USER_ID = 1L;
     private static final Long USER_ID_WRONG = 5L;
     private static final Long REQUEST_ID = 1L;
     private static final Long REQUEST_ID_WRONG = 3L;
     private static final String REQUEST_DESCRIPTION = "request_description";
     private static final LocalDateTime CREATED = LocalDateTime.now();
-    final User user = User.builder()
+    private final User user = User.builder()
             .id(USER_ID)
             .name("user_name")
             .email("user_email@yandex.ru")
             .build();
-    final ItemRequest request = ItemRequest.builder()
+    private final ItemRequest request = ItemRequest.builder()
             .id(REQUEST_ID)
             .description(REQUEST_DESCRIPTION)
             .created(CREATED)
             .owner(user)
             .items(Collections.emptyList())
             .build();
-    ItemRequestDto requestCreateDto = ItemRequestDto.builder()
+    private final ItemRequestDto requestCreateDto = ItemRequestDto.builder()
             .description(REQUEST_DESCRIPTION)
             .build();
-    final ItemRequestDto requestDto = ItemRequestDto.builder()
+    private final ItemRequestDto requestDto = ItemRequestDto.builder()
             .id(REQUEST_ID)
             .description(REQUEST_DESCRIPTION)
             .created(CREATED)

@@ -18,15 +18,12 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Transactional
-//@Rollback(false)
-@SpringBootTest(
-        properties = "db.name = shareit_test",
-        webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class UserIntegrationTest {
-    final JdbcTemplate jdbcTemplate;
-    final UserService userService;
-    UserDto userDto = UserDto.builder()
+    private final JdbcTemplate jdbcTemplate;
+    private final UserService userService;
+    private final UserDto userDto = UserDto.builder()
             .name("Maks")
             .email("maks@yandex.ru")
             .build();

@@ -8,16 +8,16 @@ import ru.practicum.shareit.item.model.Item;
 import java.util.List;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
-
-    @Query(" select i from Item i " +
-            "where upper(i.name) like upper(concat('%', ?1, '%')) " +
-            " or upper(i.description) like upper(concat('%', ?1, '%'))")
+    String query = "select i from Item i " +
+            "where (upper(i.name) like upper(concat('%', ?1, '%')) " +
+            "or upper(i.description) like upper(concat('%', ?1, '%'))) " +
+            "and i.available = true " +
+            "order by i.id ";
+    @Query(query)
     List<Item> search(String text);
 
-    List<Item> findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(
-            String keywordInName,
-            String keywordInDescription,
-            Pageable pageable);
+    @Query(query)
+    List<Item> search(String text, Pageable pageable);
 
     List<Item> findAllByOwnerId(Long ownerId);
 

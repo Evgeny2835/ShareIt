@@ -26,16 +26,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = UserController.class)
 public class UserControllerTest {
-    static final String URL = "/users";
-    static final Long ID = 1L;
-    static final String NAME = "test";
-    static final String UPDATED_NAME = "update";
-    static final String EMAIL = "test@yandex.ru";
-    static final String UPDATED_EMAIL = "update@yandex.ru";
+    private static final String URL = "/users";
+    private static final Long ID = 1L;
+    private static final String NAME = "test";
+    private static final String UPDATED_NAME = "update";
+    private static final String EMAIL = "test@yandex.ru";
+    private static final String UPDATED_EMAIL = "update@yandex.ru";
     @Autowired
-    ObjectMapper mapper;
+    private ObjectMapper mapper;
     @MockBean
-    UserService userService;
+    private UserService userService;
     @Autowired
     private MockMvc mockMvc;
     private final UserDto userDto = new UserDto(ID, NAME, EMAIL);

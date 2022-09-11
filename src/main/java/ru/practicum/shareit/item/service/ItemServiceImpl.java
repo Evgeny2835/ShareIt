@@ -113,15 +113,10 @@ public class ItemServiceImpl implements ItemService {
     public List<ItemDto> keywordSearch(String keyword, Integer from, Integer size) {
         List<Item> items;
         if (from == null || size == null) {
-            items = itemRepository.search(keyword)
-                    .stream()
-                    .filter(Item::getAvailable)
-                    .sorted(Comparator.comparing(Item::getId))
-                    .collect(Collectors.toList());
+            items = itemRepository.search(keyword);
         } else {
-            Pageable pageable = PageRequest.of(from / size, size, Sort.by("id"));
-            items = itemRepository.findByNameContainingIgnoreCaseOrDescriptionContainingIgnoreCaseAndAvailableIsTrue(
-                    keyword, keyword, pageable);
+            Pageable pageable = PageRequest.of(from / size, size);
+            items = itemRepository.search(keyword, pageable);
         }
         return items
                 .stream()

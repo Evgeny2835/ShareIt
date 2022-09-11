@@ -34,32 +34,32 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = BookingController.class)
 public class BookingControllerTest {
-    static final String URL = "/bookings";
+    private static final String URL = "/bookings";
     private static final Long USER_ID_WRONG = 5L;
     private static final Long USER_ID = 1L;
     private static final Long ITEM_ID = 1L;
     private static final Long BOOKING_ID = 1L;
     private static final Long BOOKING_ID_WRONG = 7L;
-    final LocalDateTime start = LocalDateTime.now().plusDays(1);
-    final LocalDateTime end = LocalDateTime.now().plusDays(2);
-    final User user = User.builder()
+    private final LocalDateTime start = LocalDateTime.now().plusDays(1);
+    private final LocalDateTime end = LocalDateTime.now().plusDays(2);
+    private final User user = User.builder()
             .id(USER_ID)
             .name("user_name")
             .email("user_email@yandex.ru")
             .build();
-    final Item item = Item.builder()
+    private final Item item = Item.builder()
             .id(ITEM_ID)
             .name("item_name")
             .description("item_description")
             .available(true)
             .owner(user)
             .build();
-    final BookingCreateDto bookingCreateDto = BookingCreateDto.builder()
+    private final BookingCreateDto bookingCreateDto = BookingCreateDto.builder()
             .start(start)
             .end(end)
             .itemId(ITEM_ID)
             .build();
-    final Booking booking = Booking.builder()
+    private final Booking booking = Booking.builder()
             .id(1L)
             .start(start)
             .end(end)
@@ -67,7 +67,7 @@ public class BookingControllerTest {
             .booker(user)
             .status(BookingStatus.WAITING)
             .build();
-    final BookingDto bookingDto = BookingDto.builder()
+    private final BookingDto bookingDto = BookingDto.builder()
             .id(1L)
             .start(start)
             .end(end)
@@ -76,11 +76,11 @@ public class BookingControllerTest {
             .status(BookingStatus.WAITING)
             .build();
     @MockBean
-    BookingService bookingService;
+    private BookingService bookingService;
     @MockBean
-    BookingMapper bookingMapper;
+    private BookingMapper bookingMapper;
     @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
     @Autowired
     private MockMvc mockMvc;
 

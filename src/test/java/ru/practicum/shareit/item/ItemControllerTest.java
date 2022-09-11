@@ -30,27 +30,27 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(controllers = ItemController.class)
 public class ItemControllerTest {
-    static final String URL = "/items";
-    static final Long USER_ID = 1L;
-    static final Long USER_ID_WRONG = 5L;
-    static final String USER_NAME = "user";
-    static final String USER_EMAIL = "user@yandex.ru";
-    static final Long ITEM_ID = 1L;
-    static final String ITEM_NAME = "item";
-    static final String ITEM_NAME_UPDATE = "item_update";
-    static final String ITEM_DESCRIPTION = "item_description";
+    private static final String URL = "/items";
+    private static final Long USER_ID = 1L;
+    private static final Long USER_ID_WRONG = 5L;
+    private static final String USER_NAME = "user";
+    private static final String USER_EMAIL = "user@yandex.ru";
+    private static final Long ITEM_ID = 1L;
+    private static final String ITEM_NAME = "item";
+    private static final String ITEM_NAME_UPDATE = "item_update";
+    private static final String ITEM_DESCRIPTION = "item_description";
     @MockBean
-    ItemService itemService;
+    private ItemService itemService;
     @MockBean
-    ItemMapper itemMapper;
+    private ItemMapper itemMapper;
     @MockBean
-    CommentMapper commentMapper;
+    private CommentMapper commentMapper;
     @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
     @Autowired
     private MockMvc mockMvc;
-    final User user = new User(USER_ID, USER_NAME, USER_EMAIL);
-    final ItemDto itemDto = ItemDto.builder()
+    private final User user = new User(USER_ID, USER_NAME, USER_EMAIL);
+    private final ItemDto itemDto = ItemDto.builder()
             .id(ITEM_ID)
             .name(ITEM_NAME)
             .description(ITEM_DESCRIPTION)

@@ -34,23 +34,23 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class ItemServiceImplTest {
-    static final Long USER_ID = 1L;
-    static final Long USER_ID_WRONG = 5L;
-    static final String USER_NAME = "user";
-    static final String USER_EMAIL = "user@yandex.ru";
-    static final Long ITEM_ID = 1L;
-    static final String ITEM_NAME = "item";
-    static final String ITEM_NAME_UPDATE = "item_update";
-    static final String ITEM_DESCRIPTION = "item_description";
-    final User user = new User(USER_ID, USER_NAME, USER_EMAIL);
-    final Item item = Item.builder()
+    private static final Long USER_ID = 1L;
+    private static final Long USER_ID_WRONG = 5L;
+    private static final String USER_NAME = "user";
+    private static final String USER_EMAIL = "user@yandex.ru";
+    private static final Long ITEM_ID = 1L;
+    private static final String ITEM_NAME = "item";
+    private static final String ITEM_NAME_UPDATE = "item_update";
+    private static final String ITEM_DESCRIPTION = "item_description";
+    private final User user = new User(USER_ID, USER_NAME, USER_EMAIL);
+    private final Item item = Item.builder()
             .id(ITEM_ID)
             .name(ITEM_NAME)
             .description(ITEM_DESCRIPTION)
             .available(true)
             .owner(user)
             .build();
-    final ItemDto itemDto = ItemDto.builder()
+    private final ItemDto itemDto = ItemDto.builder()
             .id(ITEM_ID)
             .name(ITEM_NAME)
             .description(ITEM_DESCRIPTION)
@@ -58,16 +58,16 @@ public class ItemServiceImplTest {
             .ownerId(USER_ID)
             .build();
     @Mock
-    ItemRepository itemRepository;
+    private ItemRepository itemRepository;
     @Mock
-    UserService userService;
+    private UserService userService;
     @Mock
-    ItemMapper itemMapper;
+    private ItemMapper itemMapper;
     @Mock
-    CommentRepository commentRepository;
+    private CommentRepository commentRepository;
     @Mock
-    BookingRepository bookingRepository;
-    ItemService itemService;
+    private BookingRepository bookingRepository;
+    private ItemService itemService;
 
     @BeforeEach
     void init() {

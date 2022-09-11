@@ -31,26 +31,26 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(controllers = ItemRequestController.class)
 public class ItemRequestControllerTest {
     @MockBean
-    ItemRequestService itemRequestService;
+    private ItemRequestService itemRequestService;
     @Autowired
-    ObjectMapper objectMapper;
+    private ObjectMapper objectMapper;
     @Autowired
     private MockMvc mockMvc;
-    static final String URL = "/requests";
+    private static final String URL = "/requests";
     private static final Long USER_ID = 1L;
     private static final Long USER_ID_WRONG = 5L;
     private static final Long REQUEST_ID = 1L;
     private static final String REQUEST_DESCRIPTION = "request_description";
     private static final LocalDateTime CREATED = LocalDateTime.now();
-    final User user = User.builder()
+    private final User user = User.builder()
             .id(USER_ID)
             .name("user_name")
             .email("user_email@yandex.ru")
             .build();
-    final ItemRequestDto requestCreateDto = ItemRequestDto.builder()
+    private final ItemRequestDto requestCreateDto = ItemRequestDto.builder()
             .description(REQUEST_DESCRIPTION)
             .build();
-    final ItemRequestDto requestDto = ItemRequestDto.builder()
+    private final ItemRequestDto requestDto = ItemRequestDto.builder()
             .id(REQUEST_ID)
             .description(REQUEST_DESCRIPTION)
             .created(CREATED)

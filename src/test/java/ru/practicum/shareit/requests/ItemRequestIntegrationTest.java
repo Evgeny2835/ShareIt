@@ -24,15 +24,15 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ItemRequestIntegrationTest {
-    final JdbcTemplate jdbcTemplate;
-    final UserService userService;
-    final ItemRequestService itemRequestService;
+    private final JdbcTemplate jdbcTemplate;
+    private final UserService userService;
+    private final ItemRequestService itemRequestService;
     private static final String REQUEST_DESCRIPTION = "request_description";
-    final UserDto userCreateDto = UserDto.builder()
+    private final UserDto userCreateDto = UserDto.builder()
             .name("user_name")
             .email("user_email@yandex.ru")
             .build();
-    final ItemRequestDto requestCreateDto = ItemRequestDto.builder()
+    private final ItemRequestDto requestCreateDto = ItemRequestDto.builder()
             .description(REQUEST_DESCRIPTION)
             .build();
 
@@ -55,7 +55,6 @@ public class ItemRequestIntegrationTest {
         assertThat(result.getDescription(), equalTo(itemRequestDto.getDescription()));
         assertThat(result.getCreated(), equalTo(itemRequestDto.getCreated()));
         assertThat(result.getOwner().getId(), equalTo(itemRequestDto.getOwnerId()));
-
     }
 
     private ItemRequest mapRowToItemRequest(ResultSet rs) throws SQLException {

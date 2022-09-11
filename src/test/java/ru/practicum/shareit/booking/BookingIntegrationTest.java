@@ -29,15 +29,15 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class BookingIntegrationTest {
-    final JdbcTemplate jdbcTemplate;
-    final ItemService itemService;
-    final UserService userService;
-    final BookingService bookingService;
-    UserDto newUserDtoOwner = UserDto.builder()
+    private final JdbcTemplate jdbcTemplate;
+    private final ItemService itemService;
+    private final UserService userService;
+    private final BookingService bookingService;
+    private final UserDto newUserDtoOwner = UserDto.builder()
             .name("user_name")
             .email("user_email@yandex.ru")
             .build();
-    UserDto newUserDtoBooker = UserDto.builder()
+    private final UserDto newUserDtoBooker = UserDto.builder()
             .name("booker_name")
             .email("booker_email@yandex.ru")
             .build();

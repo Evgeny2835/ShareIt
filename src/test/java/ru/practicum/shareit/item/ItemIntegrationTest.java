@@ -25,10 +25,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class ItemIntegrationTest {
-    final JdbcTemplate jdbcTemplate;
-    final ItemService itemService;
-    final UserService userService;
-    UserDto newUserDto = UserDto.builder()
+    private final JdbcTemplate jdbcTemplate;
+    private final ItemService itemService;
+    private final UserService userService;
+    private final UserDto newUserDto = UserDto.builder()
             .name("user_name")
             .email("user_email@yandex.ru")
             .build();

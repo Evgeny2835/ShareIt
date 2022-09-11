@@ -24,16 +24,16 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceImplTest {
-    static final Long USER_ID = 1L;
-    static final String NAME = "Maks";
-    static final String UPDATE_NAME = "Maks_updated";
-    static final String EMAIL = "maks@yandex.ru";
+    private static final Long USER_ID = 1L;
+    private static final String NAME = "Maks";
+    private static final String UPDATE_NAME = "Maks_updated";
+    private static final String EMAIL = "maks@yandex.ru";
     @Mock
-    UserRepository userRepository;
-    UserService userService;
-    final UserDto userDto = new UserDto(USER_ID, NAME, EMAIL);
-    final UserDto userDtoUpdate = new UserDto(USER_ID, UPDATE_NAME, EMAIL);
-    final User user = new User(USER_ID, NAME, EMAIL);
+    private UserRepository userRepository;
+    private UserService userService;
+    private final UserDto userDto = new UserDto(USER_ID, NAME, EMAIL);
+    private final UserDto userDtoUpdate = new UserDto(USER_ID, UPDATE_NAME, EMAIL);
+    private final User user = new User(USER_ID, NAME, EMAIL);
 
     @BeforeEach
     void init() {
