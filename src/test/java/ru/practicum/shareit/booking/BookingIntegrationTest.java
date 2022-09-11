@@ -56,7 +56,7 @@ public class BookingIntegrationTest {
         ItemDto itemDto = itemService.create(userDtoOwner.getId(), newItemDto);
 
         LocalDateTime start = LocalDateTime.now().plusDays(1);
-        LocalDateTime end = LocalDateTime.now().plusDays(2);
+        LocalDateTime end = start.plusDays(1);;
 
         BookingCreateDto bookingCreateDto = BookingCreateDto.builder()
                 .start(start)

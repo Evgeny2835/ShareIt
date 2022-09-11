@@ -41,7 +41,7 @@ public class BookingControllerTest {
     private static final Long BOOKING_ID = 1L;
     private static final Long BOOKING_ID_WRONG = 7L;
     private final LocalDateTime start = LocalDateTime.now().plusDays(1);
-    private final LocalDateTime end = LocalDateTime.now().plusDays(2);
+    private final LocalDateTime end = start.plusDays(1);
     private final User user = User.builder()
             .id(USER_ID)
             .name("user_name")

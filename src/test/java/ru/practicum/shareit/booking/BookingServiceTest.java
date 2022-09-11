@@ -33,39 +33,39 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class BookingServiceTest {
     @Mock
-    BookingRepository bookingRepository;
+    private BookingRepository bookingRepository;
     @Mock
-    UserService userService;
+    private UserService userService;
     @Mock
-    BookingMapper bookingMapper;
+    private BookingMapper bookingMapper;
     @Mock
-    ItemRepository itemRepository;
+    private ItemRepository itemRepository;
     @InjectMocks
-    BookingServiceImpl bookingService;
+    private BookingServiceImpl bookingService;
     private static final Long USER_ID_WRONG = 5L;
     private static final Long USER_ID = 1L;
     private static final Long ITEM_ID = 1L;
     private static final Long BOOKING_ID = 1L;
-    final LocalDateTime start = LocalDateTime.now().plusDays(1);
-    final LocalDateTime end = LocalDateTime.now().plusDays(2);
-    final User user = User.builder()
+    private final LocalDateTime start = LocalDateTime.now().plusDays(1);
+    private final LocalDateTime end = start.plusDays(1);
+    private final User user = User.builder()
             .id(USER_ID)
             .name("user_name")
             .email("user_email@yandex.ru")
             .build();
-    final Item item = Item.builder()
+    private final Item item = Item.builder()
             .id(ITEM_ID)
             .name("item_name")
             .description("item_description")
             .available(true)
             .owner(user)
             .build();
-    final BookingCreateDto bookingCreateDto = BookingCreateDto.builder()
+    private final BookingCreateDto bookingCreateDto = BookingCreateDto.builder()
             .start(start)
             .end(end)
             .itemId(ITEM_ID)
             .build();
-    final Booking booking = Booking.builder()
+    private final Booking booking = Booking.builder()
             .id(1L)
             .start(start)
             .end(end)
@@ -74,7 +74,7 @@ class BookingServiceTest {
             .status(BookingStatus.WAITING)
             .build();
 
-    final BookingDto bookingDto = BookingDto.builder()
+    private final BookingDto bookingDto = BookingDto.builder()
             .id(1L)
             .start(start)
             .end(end)
