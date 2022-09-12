@@ -11,6 +11,7 @@ import java.util.Objects;
 @Table(name = "items")
 @Getter
 @Setter
+@Builder
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor

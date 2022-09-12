@@ -27,4 +27,10 @@ public class ControllerExceptionHandler {
     public ErrorResponse handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
         return new ErrorResponse(String.format("Unknown %s: %s", e.getName(), e.getValue()));
     }
+
+    @ExceptionHandler(EmailDuplicateException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleConflictException(EmailDuplicateException e) {
+        return new ErrorResponse(e.getMessage());
+    }
 }

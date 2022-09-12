@@ -5,11 +5,11 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.UserService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
-import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
@@ -44,7 +44,7 @@ public class UserController {
     }
 
     @GetMapping
-    public Collection<User> getUsers() {
+    public List<User> getUsers() {
         return userService.getUsers();
     }
 }

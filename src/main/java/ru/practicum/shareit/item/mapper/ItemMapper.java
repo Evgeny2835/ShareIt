@@ -1,6 +1,5 @@
 package ru.practicum.shareit.item.mapper;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.practicum.shareit.booking.dto.BookingItemDto;
 import ru.practicum.shareit.booking.model.Booking;
@@ -9,6 +8,7 @@ import ru.practicum.shareit.item.comment.repository.CommentRepository;
 import ru.practicum.shareit.item.comment.service.CommentMapper;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.requests.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
@@ -22,14 +22,16 @@ public class ItemMapper {
     private final BookingService bookingService;
     private final CommentRepository commentRepository;
     private final CommentMapper commentMapper;
+    private final ItemRequestRepository itemRequestRepository;
 
-    @Autowired
     public ItemMapper(BookingService bookingService,
                       CommentRepository commentRepository,
-                      CommentMapper commentMapper) {
+                      CommentMapper commentMapper,
+                      ItemRequestRepository itemRequestRepository) {
         this.bookingService = bookingService;
         this.commentRepository = commentRepository;
         this.commentMapper = commentMapper;
+        this.itemRequestRepository = itemRequestRepository;
     }
 
     public Item toItem(ItemDto itemDto, User owner) {
@@ -38,25 +40,14 @@ public class ItemMapper {
                 itemDto.getDescription(),
                 itemDto.getAvailable(),
                 owner,
-                itemDto.getRequest() != null ? itemDto.getRequest() : null
+                itemDto.getRequestId() != null ? itemRequestRepository
+                        .findById(itemDto.getRequestId()).orElse(null) : null
         );
     }
 
     public ItemDto toItemDto(Item item, Long userId) {
-        ItemDto itemDto = new ItemDto(
-                item.getId(),
-                item.getName(),
-                item.getDescription(),
-                item.getAvailable(),
-                item.getOwner().getId(),
-                item.getRequest() != null ? item.getRequest() : null
-        );
-        itemDto.setComments(commentRepository.findCommentsByItem_Id(item.getId())
-                .stream()
-                .map(commentMapper::toCommentDto)
-                .collect(Collectors.toSet()));
+        ItemDto itemDto = createItemDto(item);
         if (Objects.equals(userId, item.getOwner().getId())) {
-
             itemDto.setLastBooking(getLastBooking(bookingService.getAllByItem(item)));
             itemDto.setNextBooking(getNextBooking(bookingService.getAllByItem(item)));
         }
@@ -64,18 +55,7 @@ public class ItemMapper {
     }
 
     public ItemDto toItemDto(Item item) {
-        ItemDto itemDto = new ItemDto(
-                item.getId(),
-                item.getName(),
-                item.getDescription(),
-                item.getAvailable(),
-                item.getOwner().getId(),
-                item.getRequest() != null ? item.getRequest() : null
-        );
-        itemDto.setComments(commentRepository.findCommentsByItem_Id(item.getId())
-                .stream()
-                .map(commentMapper::toCommentDto)
-                .collect(Collectors.toSet()));
+        ItemDto itemDto = createItemDto(item);
         itemDto.setLastBooking(getLastBooking(bookingService.getAllByItem(item)));
         itemDto.setNextBooking(getNextBooking(bookingService.getAllByItem(item)));
         return itemDto;
@@ -89,7 +69,6 @@ public class ItemMapper {
                 .findFirst()
                 .orElse(null);
     }
-
 
     private BookingItemDto getNextBooking(List<Booking> bookings) {
         return bookings.stream()
@@ -107,5 +86,21 @@ public class ItemMapper {
                 .end(booking.getEnd())
                 .bookerId(booking.getBooker().getId())
                 .build();
+    }
+
+    private ItemDto createItemDto(Item item) {
+        ItemDto itemDto = ItemDto.builder()
+                .id(item.getId())
+                .name(item.getName())
+                .description(item.getDescription())
+                .available(item.getAvailable())
+                .ownerId(item.getOwner().getId())
+                .requestId(item.getRequest() != null ? item.getRequest().getId() : null)
+                .build();
+        itemDto.setComments(commentRepository.findCommentsByItem_Id(item.getId())
+                .stream()
+                .map(commentMapper::toCommentDto)
+                .collect(Collectors.toSet()));
+        return itemDto;
     }
 }
