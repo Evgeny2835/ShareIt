@@ -24,9 +24,7 @@ Java SE, Spring Boot, Hibernate, PostgreSQL, Maven, Docker, Lombok, JDBC, JUnit,
 Порядок запуска контейнеров: БД, server, gateway
 ---
 ### Визуализация результатов работы
-Коллекции тестов Postman:
-* [основной сервис - ewm-main-service.json](https://github.com/Evgeny2835/Explore-with-me/blob/main/postman/ewm-main-service.json)
-* [сервис статистики - ewm-stat-service.json](https://github.com/Evgeny2835/Explore-with-me/blob/main/postman/ewm-stat-service.json)
+[Postman коллекция](https://github.com/Evgeny2835/ShareIt/blob/main/postman/sprint.json)
 
 ### ER диаграмма
 
