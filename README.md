@@ -10,4 +10,4 @@
 * по запросу позволяет добавлять новые вещи для шеринга.<br />
 
 ### Стек технологий:
-Java, SpringBoot, Lombok<br />
+Java SE, Spring Boot, Hibernate, PostgreSQL, Maven, Docker, Lombok, JDBC, JUnit, mockito<br />
