@@ -26,7 +26,7 @@ Java SE, Spring Boot, Hibernate, PostgreSQL, Maven, Docker, Lombok, JDBC, JUnit,
 
 ### ER диаграмма
 ![ER_diagram](ER_diagram.png)
----
+
 ### Основные сценарии:
 * добавление новой вещи (эндпойнт POST /items)
 * редактирование вещи (эндпойнт PATCH /items/{itemId}), изменить можно название, описание и статус доступа к аренде, редактировать вещь может только её владелец
@@ -36,14 +36,51 @@ Java SE, Spring Boot, Hibernate, PostgreSQL, Maven, Docker, Lombok, JDBC, JUnit,
 * добавление нового запроса на бронирование (эндпоинт — POST /bookings), запрос может быть создан любым пользователем, а затем подтверждён владельцем вещи, после создания запрос находится в статусе WAITING — "ожидает подтверждения"
 * подтверждение или отклонение запроса на бронирование (эндпоинт PATCH /bookings/{bookingId}?approved={approved}), параметр "approved" может принимать значения "true" или "false", подтверждение может быть выполнено только владельцем вещи, затем статус бронирования становится либо APPROVED, либо REJECTED
 * получение данных о конкретном бронировании, включая статус (эндпоинт GET /bookings/{bookingId}), может быть выполнено либо автором бронирования, либо владельцем вещи, к которой относится бронирование
-* получение списка всех бронирований текущего пользователя (эндпоинт GET /bookings?state={state}), параметр "state" необязательный и по умолчанию равен ALL, также он может принимать значения CURRENT (текущие), PAST (завершённые), FUTURE (будущие), WAITING (ожидающие подтверждения), REJECTED (отклонённые), бронирования возвращаться отсортированными по дате от более новых к более старым
-* получение списка бронирований для всех вещей текущего пользователя (эндпоинт GET /bookings/owner?state={state}), запрос имеет смысл для владельца хотя бы одной вещи
+* получение списка всех бронирований текущего пользователя (эндпоинт GET /bookings?state={state}), параметр "state" необязательный и по умолчанию равен ALL, также он может принимать значения CURRENT (текущие), PAST (завершённые), FUTURE (будущие), WAITING (ожидающие подтверждения), REJECTED (отклонённые), бронирования возвращаются отсортированными по дате от более новых к более старым
 * добавление запроса вещи (эндпоинт POST /requests), основная часть запроса — текст запроса, где пользователь описывает, какая именно вещь ему нужна
 * получение списка своих запросов с данными об ответах на них (эндпоинт GET /requests), для каждого запроса указываются описание, дата и время создания и список ответов, запросы возвращаются в отсортированном порядке от более новых к более старым
-* получение списка запросов, созданных другими пользователями (эндпоинт GET /requests/all?from={from}&size={size}, с помощбю которого пользователи могут просматривать запросы, на которые они могли бы ответить), запросы сортируются по дате создания: от более новых к более старым, результаты возвращаются постранично, для чего передаются два параметра: "from" — индекс первого элемента, начиная с 0, и "size" — количество элементов для отображения
-получение данных об одном конкретном запросе вместе с данными об ответах (эндпоинт GET /requests/{requestId}), посмотреть данные об отдельном запросе может любой пользователь
+* получение списка запросов, созданных другими пользователями (эндпоинт GET /requests/all?from={from}&size={size}, с помощью которого пользователи могут просматривать запросы, на которые они могли бы ответить), запросы сортируются по дате создания: от более новых к более старым, результаты возвращаются постранично, для чего передаются два параметра: "from" — индекс первого элемента, начиная с 0, и "size" — количество элементов для отображения
 
 ### Тестирование
+Реализовано юнит и интеграционное тестирование<br />
+Примеры кода:
+```
+  @Test
+    void create_shouldAnswer404WhenUserIsOwnerOfItem() throws Exception {
+        when(bookingService.create(USER_ID, bookingCreateDto))
+                .thenThrow(NotFoundException.class);
 
+        mockMvc.perform(post(URL)
+                        .header("X-Sharer-User-Id", USER_ID)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(bookingCreateDto)))
+                .andExpect(status().is(404));
+    }
+```
+```
+  @Test
+    void create_shouldReturnNewUser() {
+        UserDto userDto = userService.create(userCreateDto);
+        ItemCreateDto itemCreateDto = ItemCreateDto.builder()
+                .name("item_name")
+                .description("item_description")
+                .available(true)
+                .build();
+        itemService.create(userDto.getId(), itemCreateDto);
 
+        String sql = "select * from items where name = ?";
 
+        Item item = jdbcTemplate.query(sql, (rs, rowNum) -> mapRowToItem(rs),
+                        itemCreateDto.getName())
+                .stream()
+                .findFirst()
+                .orElse(null);
+
+        assertNotNull(item);
+        assertThat(item.getId(), notNullValue());
+        assertThat(item.getName(), equalTo(itemCreateDto.getName()));
+        assertThat(item.getDescription(), equalTo(itemCreateDto.getDescription()));
+        assertThat(item.getAvailable(), equalTo(itemCreateDto.getAvailable()));
+        assertThat(item.getOwner().getId(), equalTo(userDto.getId()));
+    }
+```
