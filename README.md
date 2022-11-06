@@ -19,6 +19,7 @@ Java SE, Spring Boot, Hibernate, PostgreSQL, Maven, Docker, Lombok, JDBC, JUnit,
 
 ### Запуск:
 * требуется установленные Docker (при разработке использовалась версия 3.8) и Docker Compose
+* склонировать репозиторий
 * в корневой папке проекта открыть терминал и выполнить команду 'docker-compose up'
 
 ### Визуализация результатов работы
